@@ -22,8 +22,8 @@ module.exports = {
     // 'plugin:eslint-comments/recommended',
   ],
   rules: {
-    'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': ['error'],
+    // 'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['off'],
     '@typescript-eslint/no-var-requires': 'off',
     'react/prop-types': 'off',
     'react/jsx-uses-react': 'off',
