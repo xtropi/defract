@@ -1,5 +1,5 @@
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
-import { Button, CssBaseline } from '@mui/material'
+import { BrowserRouter, Route, Routes, Link } from 'react-router-dom'
+import { Button, CssBaseline, Switch, Link as UiLink } from '@mui/material'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { Authentication, Wallets } from './pages'
 import { useState } from 'react'
@@ -15,10 +15,14 @@ const themeLight = createTheme({
 const themeDark = createTheme({
   palette: {
     background: {
-      default: '#222222',
+      default: 'rgb(030, 030, 030)',
+      paper: 'rgb(100, 100, 100)',
+    },
+    primary: {
+      main: '#add6a4',
     },
     text: {
-      primary: '#ffffff',
+      primary: '#cfd6e4',
     },
   },
 })
@@ -29,9 +33,19 @@ export const App = () => {
     <ThemeProvider theme={light ? themeLight : themeDark}>
       <CssBaseline />
       <BrowserRouter>
-        <Link to="/">Authentication</Link>
-        <Link to="/wallets">Wallets</Link>
-        <Button onClick={() => setLight((prev) => !prev)}>Toggle Theme</Button>
+        <UiLink sx={{ m: 1 }} component={Link} to="/">
+          Authentication
+        </UiLink>
+        <UiLink sx={{ m: 1 }} component={Link} to="/wallets">
+          Wallets
+        </UiLink>
+        <Switch
+          checked={light}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setLight(event.target.checked)
+          }
+          inputProps={{ 'aria-label': 'controlled' }}
+        />
         <Routes>
           <Route path="/wallets" element={<Wallets />} />
           <Route path="/" element={<Authentication />} />

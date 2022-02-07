@@ -1,76 +1,91 @@
 import { useState } from 'react'
-import { gql, useLazyQuery, useQuery } from '@apollo/client'
-
-const FLOW = gql`
-  query (
-    $address: String!
-    $from: ISO8601DateTime!
-    $till: ISO8601DateTime!
-    $limit: Int!
-    $offset: Int!
-  ) {
-    solana {
-      transfers(
-        date: { since: $from, till: $till }
-        options: {
-          limit: $limit
-          offset: $offset
-          desc: ["count_in", "count_out"]
-          asc: "currency.symbol"
-        }
-      ) {
-        sum_in: amount(calculate: sum, receiverAddress: { is: $address })
-        sum_out: amount(calculate: sum, senderAddress: { is: $address })
-        count_in: countBigInt(receiverAddress: { is: $address })
-        count_out: countBigInt(senderAddress: { is: $address })
-        currency {
-          symbol
-        }
-      }
-    }
-  }
-`
+import { getStakeAccounts, getAccount } from '../api/solana'
+import { getRecentPrice } from '../api/binance'
+import { Box, Button, Input, Paper, Typography, useTheme } from '@mui/material'
 
 export const SolanaWallet: React.FC = () => {
+  const theme = useTheme()
   const [account, setAccount] = useState(
     'FcfZ67yZzdMCdbZKMkqWtMdm4uFSfRzJbkTZh2QrfnTV'
   )
+  const [accountData, setAccountData] = useState<any>()
+  const [stakesData, setStakesData] = useState<any>()
+  const [stakedTotal, setStakedTotalData] = useState<any>()
+  const [loading, setLoading] = useState(false)
+  const [prices, setPrices] = useState<any>()
+  const LAMPORTS_IN_SOL = 1000000000
+
   function handleInput(event: React.ChangeEvent<HTMLInputElement>) {
     const value: string = event.currentTarget.value
     setAccount(value)
   }
+
   function handleClick() {
-    getAccount()
+    setLoading(true)
+    Promise.all([
+      getAccount(account),
+      getStakeAccounts(account),
+      getRecentPrice('SOLUSDT'),
+    ])
+      .then(([accountData, stakes, priceData]) => {
+        setAccountData(accountData)
+        setStakesData(stakes)
+        setStakedTotalData(
+          Object.keys(stakes).reduce((acc, key) => {
+            return acc + Number(stakes[key].amount)
+          }, 0)
+        )
+        setPrices((...pState: any) => ({ ...pState, SOLUSDT: priceData.price }))
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.log(err)
+        setLoading(false)
+      })
   }
-  const [getAccount, { loading, error, data }] = useLazyQuery(FLOW, {
-    variables: {
-      limit: 10,
-      offset: 0,
-      address: account,
-      from: '2022-01-07',
-      till: '2022-02-05T23:59:59',
-      dateFormat: '%Y-%m-%d',
-    },
-  })
-  const transfers = data?.solana?.transfers
 
   return (
-    <>
-      <input type="text" value={account} onChange={handleInput} />
-      <button onClick={handleClick}>Get data</button>
-
-      {error && <pre>{JSON.stringify(error, null, ' ')}</pre>}
+    <Paper
+      elevation={3}
+      sx={{
+        width: 500,
+        borderRadius: '10px',
+        p: 1,
+      }}
+    >
+      <Typography variant="h5" gutterBottom component="div">
+        SOLANA Wallet
+      </Typography>
+      <Input sx={{ width: 350, m: 1 }} value={account} onChange={handleInput} />
+      <Button color="primary" variant="contained" onClick={handleClick}>
+        Get data
+      </Button>
 
       {loading ? (
         <div>Loading...</div>
-      ) : transfers ? (
+      ) : accountData ? (
         <>
-          <pre>{JSON.stringify(transfers, null, ' ')}</pre>
-          <div>Balance: {transfers[0].sum_in - transfers[0].sum_out} SOL</div>
+          <div>
+            Wallet: {(accountData.lamports / LAMPORTS_IN_SOL).toFixed(2)} SOL
+          </div>
+          <div>Staked: {(stakedTotal / LAMPORTS_IN_SOL).toFixed(2)} SOL</div>
+          <div>
+            Balance:{' '}
+            {((accountData.lamports + stakedTotal) / LAMPORTS_IN_SOL).toFixed(
+              2
+            )}{' '}
+            SOL ~{' '}
+            {(
+              Math.floor(
+                (accountData.lamports + stakedTotal) / LAMPORTS_IN_SOL
+              ) * prices?.SOLUSDT
+            ).toFixed(2)}{' '}
+            USD
+          </div>
         </>
       ) : (
         <div>No data</div>
       )}
-    </>
+    </Paper>
   )
 }
