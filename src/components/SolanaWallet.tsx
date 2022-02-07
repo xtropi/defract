@@ -6,7 +6,7 @@ import { Box, Button, Input, Paper, Typography, useTheme } from '@mui/material'
 export const SolanaWallet: React.FC = () => {
   const theme = useTheme()
   const [account, setAccount] = useState(
-    'FcfZ67yZzdMCdbZKMkqWtMdm4uFSfRzJbkTZh2QrfnTV'
+    '3n4VwSmYMZd3HWnoVHcFo3mawtqwVTKWGJrCbM5Ki9UG'
   )
   const [accountData, setAccountData] = useState<any>()
   const [stakesData, setStakesData] = useState<any>()
@@ -51,6 +51,7 @@ export const SolanaWallet: React.FC = () => {
         width: 500,
         borderRadius: '10px',
         p: 1,
+        m: 1,
       }}
     >
       <Typography variant="h5" gutterBottom component="div">
