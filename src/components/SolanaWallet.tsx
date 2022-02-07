@@ -75,10 +75,9 @@ export const SolanaWallet: React.FC = () => {
               2
             )}{' '}
             SOL ~{' '}
-            {(
-              Math.floor(
-                (accountData.lamports + stakedTotal) / LAMPORTS_IN_SOL
-              ) * prices?.SOLUSDT
+            {Math.floor(
+              ((accountData.lamports + stakedTotal) / LAMPORTS_IN_SOL) *
+                prices?.SOLUSDT
             ).toFixed(2)}{' '}
             USD
           </div>
