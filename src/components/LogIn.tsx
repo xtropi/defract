@@ -38,7 +38,6 @@ export function LogIn() {
         setError(error.message)
         setLoading(false)
       })
-    //   history.push("/")
   }
 
   const handleChange = useCallback((event: any) => {

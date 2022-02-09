@@ -1,46 +1,53 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getStakeAccounts, getAccount } from '../api/solana'
 import { getRecentPrice } from '../api/binance'
 import { Box, Button, Input, Paper, Typography, useTheme } from '@mui/material'
 
-export const SolanaWallet: React.FC = () => {
+interface IWalletProps {
+  wallet: string
+}
+
+export const SolanaWallet: React.FC<IWalletProps> = (props) => {
   const theme = useTheme()
   const [account, setAccount] = useState('')
-  const [accountData, setAccountData] = useState<any>()
+  const [walletData, setWalletData] = useState<any>()
   const [stakesData, setStakesData] = useState<any>()
   const [stakedTotal, setStakedTotalData] = useState<any>()
   const [loading, setLoading] = useState(false)
   const [prices, setPrices] = useState<any>()
   const LAMPORTS_IN_SOL = 1000000000
 
-  function handleInput(event: React.ChangeEvent<HTMLInputElement>) {
-    const value: string = event.currentTarget.value
-    setAccount(value)
-  }
+  useEffect(() => {
+    if (!props.wallet) {
+      return
+    }
 
-  function handleClick() {
     setLoading(true)
+
     Promise.all([
-      getAccount(account),
-      getStakeAccounts(account),
+      getAccount(props.wallet),
+      getStakeAccounts(props.wallet),
       getRecentPrice('SOLUSDT'),
     ])
       .then(([accountData, stakes, priceData]) => {
-        setAccountData(accountData)
+        setWalletData(accountData)
         setStakesData(stakes)
         setStakedTotalData(
           Object.keys(stakes).reduce((acc, key) => {
             return acc + Number(stakes[key].amount)
           }, 0)
         )
-        setPrices((...pState: any) => ({ ...pState, SOLUSDT: priceData.price }))
+        setPrices((...pState: any) => ({
+          ...pState,
+          SOLUSDT: priceData.price,
+        }))
         setLoading(false)
       })
       .catch((err) => {
         console.log(err)
         setLoading(false)
       })
-  }
+  }, [props.wallet])
 
   return (
     <Paper
@@ -55,27 +62,21 @@ export const SolanaWallet: React.FC = () => {
       <Typography variant="h5" gutterBottom component="div">
         SOLANA Wallet
       </Typography>
-      <Input sx={{ width: 350, m: 1 }} value={account} onChange={handleInput} />
-      <Button color="primary" variant="contained" onClick={handleClick}>
-        Get data
-      </Button>
-
+      {props.wallet && <div>Account: {props.wallet}</div>}
       {loading ? (
         <div>Loading...</div>
-      ) : accountData ? (
+      ) : walletData ? (
         <>
           <div>
-            Wallet: {(accountData.lamports / LAMPORTS_IN_SOL).toFixed(2)} SOL
+            Wallet: {(walletData.lamports / LAMPORTS_IN_SOL).toFixed(2)} SOL
           </div>
           <div>Staked: {(stakedTotal / LAMPORTS_IN_SOL).toFixed(2)} SOL</div>
           <div>
             Balance:{' '}
-            {((accountData.lamports + stakedTotal) / LAMPORTS_IN_SOL).toFixed(
-              2
-            )}{' '}
+            {((walletData.lamports + stakedTotal) / LAMPORTS_IN_SOL).toFixed(2)}{' '}
             SOL ~{' '}
             {Math.floor(
-              ((accountData.lamports + stakedTotal) / LAMPORTS_IN_SOL) *
+              ((walletData.lamports + stakedTotal) / LAMPORTS_IN_SOL) *
                 prices?.SOLUSDT
             ).toFixed(2)}{' '}
             USD

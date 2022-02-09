@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes, Link, Navigate } from 'react-router-dom'
-import { Button, CssBaseline, Switch, Link as UiLink } from '@mui/material'
+import { CssBaseline, Switch, Link as UiLink } from '@mui/material'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { Authentication, Registration, Wallets } from './pages'
 import { useState } from 'react'
@@ -10,7 +10,7 @@ import { useAuth } from './contexts/AuthContext'
 const themeLight = createTheme({
   palette: {
     background: {
-      default: 'lightgrey',
+      default: 'rgb(235, 235, 235)',
     },
   },
 })
@@ -18,8 +18,8 @@ const themeLight = createTheme({
 const themeDark = createTheme({
   palette: {
     background: {
-      default: 'rgb(030, 030, 030)',
-      paper: 'rgb(100, 100, 100)',
+      default: 'rgb(30, 30, 30)',
+      paper: 'rgb(70, 70, 70)',
     },
     primary: {
       main: 'rgb(220, 100, 10)',
