@@ -5,9 +5,7 @@ import { Box, Button, Input, Paper, Typography, useTheme } from '@mui/material'
 
 export const SolanaWallet: React.FC = () => {
   const theme = useTheme()
-  const [account, setAccount] = useState(
-    '3n4VwSmYMZd3HWnoVHcFo3mawtqwVTKWGJrCbM5Ki9UG'
-  )
+  const [account, setAccount] = useState('')
   const [accountData, setAccountData] = useState<any>()
   const [stakesData, setStakesData] = useState<any>()
   const [stakedTotal, setStakedTotalData] = useState<any>()
